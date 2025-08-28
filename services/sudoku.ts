@@ -1,5 +1,5 @@
-
 import { Grid, Difficulty } from '../types';
+import { GoogleGenAI, Type } from "@google/genai";
 
 const SIZE = 4;
 const BOX_SIZE = 2;
@@ -77,8 +77,7 @@ export const solve = (grid: Grid): boolean => {
   return false;
 };
 
-
-export const generatePuzzle = (difficulty: Difficulty): { initial: Grid; solved: Grid } => {
+const generatePuzzleOffline = (difficulty: Difficulty): { initial: Grid; solved: Grid } => {
   const solvedGrid: Grid = Array(SIZE).fill(0).map(() => Array(SIZE).fill(0));
   solve(solvedGrid);
 
@@ -97,7 +96,7 @@ export const generatePuzzle = (difficulty: Difficulty): { initial: Grid; solved:
       break;
   }
   
-  const cells = [];
+  const cells: {row: number, col: number}[] = [];
   for (let i = 0; i < SIZE; i++) {
     for (let j = 0; j < SIZE; j++) {
       cells.push({row: i, col: j});
@@ -105,12 +104,78 @@ export const generatePuzzle = (difficulty: Difficulty): { initial: Grid; solved:
   }
   shuffle(cells);
 
-  for (let i = 0; i < cellsToRemove; i++) {
-    const {row, col} = cells[i];
-    if (initialGrid[row][col] !== 0) {
+  let removed = 0;
+  while(removed < cellsToRemove && cells.length > 0) {
+    const cell = cells.pop();
+    if(cell) {
+        const {row, col} = cell;
         initialGrid[row][col] = 0;
+        removed++;
     }
   }
 
   return { initial: initialGrid, solved: solvedGrid };
+};
+
+
+export const generatePuzzle = async (difficulty: Difficulty): Promise<{ initial: Grid; solved: Grid }> => {
+    try {
+        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        const prompt = `Generate a 4x4 Sudoku puzzle with ${difficulty} difficulty.
+        Provide the initial puzzle grid and the fully solved grid.
+        The grid should be a 2D array of numbers, where 0 represents an empty cell in the initial grid.
+        The size of the grid must be 4x4.
+        The numbers used must be 1, 2, 3, and 4.
+        Ensure the puzzle is valid and has a unique solution.`;
+        
+        const responseSchema = {
+            type: Type.OBJECT,
+            properties: {
+                initial: {
+                    type: Type.ARRAY,
+                    description: "The initial 4x4 Sudoku grid with some cells empty (represented by 0).",
+                    items: {
+                        type: Type.ARRAY,
+                        items: { type: Type.INTEGER }
+                    }
+                },
+                solved: {
+                    type: Type.ARRAY,
+                    description: "The complete solved 4x4 Sudoku grid.",
+                    items: {
+                        type: Type.ARRAY,
+                        items: { type: Type.INTEGER }
+                    }
+                }
+            },
+            required: ["initial", "solved"]
+        };
+
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: prompt,
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: responseSchema,
+            },
+        });
+
+        const jsonString = response.text.trim();
+        const puzzle = JSON.parse(jsonString);
+
+        if (
+            puzzle.initial && Array.isArray(puzzle.initial) && puzzle.initial.length === SIZE &&
+            puzzle.solved && Array.isArray(puzzle.solved) && puzzle.solved.length === SIZE
+        ) {
+            return puzzle;
+        } else {
+            console.error("AI response format is invalid. Falling back to offline generation.");
+            return generatePuzzleOffline(difficulty);
+        }
+
+    } catch (error) {
+        console.error("Error generating puzzle with AI:", error);
+        console.log("Falling back to offline puzzle generation.");
+        return generatePuzzleOffline(difficulty);
+    }
 };

@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mini Sudoku</title>
+    <title>Farcaster Mini Sudoku</title>
     
     <!-- Farcaster Mini App / Frame Meta Tags -->
-    <meta property="og:title" content="Mini Sudoku" />
+    <meta property="og:title" content="Farcaster Mini Sudoku" />
     <meta property="og:description" content="Play a 4x4 Sudoku puzzle right here on Farcaster." />
     <meta property="og:image" content="data:image/svg+xml,%3Csvg%20width%3D%221200%22%20height%3D%22630%22%20viewBox%3D%220%200%201200%20630%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%231E293B%22%2F%3E%3Cstyle%3E.title%20%7B%20font%3A%20bold%2090px%20sans-serif%3B%20fill%3A%20%2367E8F9%3B%20%7D%20.subtitle%20%7B%20font%3A%2045px%20sans-serif%3B%20fill%3A%20%2394A3B8%3B%20%7D%20.grid%20%7B%20stroke%3A%20%23475569%3B%20stroke-width%3A%204%3B%20%7D%20.grid-bold%20%7B%20stroke%3A%20%2394A3B8%3B%20stroke-width%3A%208%3B%20%7D%20.number%20%7B%20font%3A%20bold%2060px%20sans-serif%3B%20fill%3A%20%23E2E8F0%3B%20text-anchor%3A%20middle%3B%20dominant-baseline%3A%20middle%3B%20%7D%3C%2Fstyle%3E%3Ctext%20x%3D%22600%22%20y%3D%22120%22%20text-anchor%3D%22middle%22%20class%3D%22title%22%3EMini%20Sudoku%3C%2Ftext%3E%3Ctext%20x%3D%22600%22%20y%3D%22180%22%20text-anchor%3D%22middle%22%20class%3D%22subtitle%22%3EA%204x4%20logic%20puzzle%20on%20Farcaster%3C%2Ftext%3E%3Cg%20transform%3D%22translate(400%2C%20220)%20scale(1.2)%22%3E%3Crect%20x%3D%220%22%20y%3D%220%22%20width%3D%22300%22%20height%3D%22300%22%20fill%3D%22%230F172A%22%20rx%3D%2210%22%2F%3E%3Cline%20x1%3D%2275%22%20y1%3D%220%22%20x2%3D%2275%22%20y2%3D%22300%22%20class%3D%22grid%22%20%2F%3E%3Cline%20x1%3D%22225%22%20y1%3D%220%22%20x2%3D%22225%22%20y2%3D%22300%22%20class%3D%22grid%22%20%2F%3E%3Cline%20x1%3D%220%22%20y1%3D%2275%22%20x2%3D%22300%22%20y2%3D%2275%22%20class%3D%22grid%22%20%2F%3E%3Cline%20x1%3D%220%22%20y1%3D%22225%22%20x2%3D%22300%22%20y2%3D%22225%22%20class%3D%22grid%22%20%2F%3E%3Cline%20x1%3D%22150%22%20y1%3D%220%22%20x2%3D%22150%22%20y2%3D%22300%22%20class%3D%22grid-bold%22%20%2F%3E%3Cline%20x1%3D%220%22%20y1%3D%22150%22%20x2%3D%22300%22%20y2%3D%22150%22%20class%3D%22grid-bold%22%20%2F%3E%3Ctext%20x%3D%2237.5%22%20y%3D%2237.5%22%20class%3D%22number%22%3E1%3C%2Ftext%3E%3Ctext%20x%3D%22112.5%22%20y%3D%2237.5%22%20class%3D%22number%22%3E2%3C%2Ftext%3E%3Ctext%20x%3D%22262.5%22%20y%3D%2237.5%22%20class%3D%22number%22%3E3%3C%2Ftext%3E%3Ctext%20x%3D%22187.5%22%20y%3D%22112.5%22%20class%3D%22number%22%3E4%3C%2Ftext%3E%3Ctext%20x%3D%22112.5%22%20y%3D%22187.5%22%20class%3D%22number%22%3E3%3C%2Ftext%3E%3Ctext%20x%3D%2237.5%22%20y%3D%22262.5%22%20class%3D%22number%22%3E2%3C%2Ftext%3E%3Ctext%20x%3D%22187.5%22%20y%3D%22262.5%22%20class%3D%22number%22%3E1%3C%2Ftext%3E%3Ctext%20x%3D%22262.5%22%20y%3D%22262.5%22%20class%3D%22number%22%3E4%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fsvg%3E" />
     <meta property="fc:frame" content="vNext" />
@@ -26,7 +26,8 @@
   "imports": {
     "react": "https://esm.sh/react@^19.1.1",
     "react/": "https://esm.sh/react@^19.1.1/",
-    "react-dom/": "https://esm.sh/react-dom@^19.1.1/"
+    "react-dom/": "https://esm.sh/react-dom@^19.1.1/",
+    "@google/genai": "https://esm.sh/@google/genai"
   }
 }
 </script>
