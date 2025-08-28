@@ -15,7 +15,7 @@
     "buttonTitle": "Sudoku",
     "splashImageUrl": "https://mini-sudoku-ten.vercel.app/splash.png",
     "splashBackgroundColor": "#0F172A",
-    "webhookUrl": "https://mini-sudoku-ten.vercel.app/api/webhook",
+    
     "subtitle": "Play Anytime, Anywhere",
     "description": "Mini Sudoku is a fun, engaging, and compact version of the classic number puzzle game, designed to fit seamlessly into your busy life. Whether you're looking for a quick brain workout during a break or a longer puzzle-solving session, Mini Sudoku delivers the perfect balance of simplicity and challenge. With adjustable difficulty levels and a sleek, intuitive interface, this app is ideal for players of all ages and skill levels.  Track your progress, challenge yourself to solve puzzles faster, and sharpen your logical thinking skills with each game. The app is lightweight, so it won’t slow down your device, and you can dive right into solving puzzles whenever you have a few free moments. Mini Sudoku—small puzzles, big fun!",
     "primaryCategory": "games",
