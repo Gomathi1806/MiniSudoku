@@ -2,8 +2,8 @@
 {
   "accountAssociation": {
     "header": "eyJmaWQiOjkyNzgwNCwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweEUwNDA4NTU2RDQxNTNDMGVGOUFmNDkxMzcwNTlhQjQ3ODFhMzBEMTkifQ",
-    "payload": "eyJkb21haW4iOiJtZW1lLXRva2VuLWNyZWF0aW9uLWFwcC52ZXJjZWwuYXBwIn0",
-    "signature": "MHhkMDRjZTAwMDE4ZTk2ZTgzMzA3MjZlMmU0OWY2MDM0NjU4ZjVlMzA0NzAwZGM0MmU3Y2Y1NzEzYmIyNTQ4NmE0MjFlMTFkNjdkNTRlNWYyZDI2MjM5NzA5NzkwZmE4YzUyMDZmZTJkMmEzZThiNWYzMzdmYjM4MGNjNzExYzliZjFi"
+    "payload": "eyJkb21haW4iOiJtaW5pLXN1ZG9rdS10ZW4udmVyY2VsLmFwcCJ9",
+    "signature": "MHhmN2M5ZDg3YTdlMzA3MTNjZTg5NThiZTc3OWVjMjg5MjMxOGNkZjIxZWE5MzdjNDM4ZDZjMGRhNDQ5Nzc1MmU3NTRmZDdjNjY3MjkzNGNlMmMyMWZmZTRlNzQwZjhmZDczMzFmOTFkODVhYWE2YmI2OGZhNTZkYWEzNWFlZmY3YzFj"
   },
  {
   "frame": {
@@ -33,3 +33,4 @@
     "tagline": "Big Fun in a Small Puzzle"
   }
 }
+
