@@ -1,1 +1,34 @@
 
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjkyNzgwNCwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweEUwNDA4NTU2RDQxNTNDMGVGOUFmNDkxMzcwNTlhQjQ3ODFhMzBEMTkifQ",
+    "payload": "eyJkb21haW4iOiJtZW1lLXRva2VuLWNyZWF0aW9uLWFwcC52ZXJjZWwuYXBwIn0",
+    "signature": "MHhkMDRjZTAwMDE4ZTk2ZTgzMzA3MjZlMmU0OWY2MDM0NjU4ZjVlMzA0NzAwZGM0MmU3Y2Y1NzEzYmIyNTQ4NmE0MjFlMTFkNjdkNTRlNWYyZDI2MjM5NzA5NzkwZmE4YzUyMDZmZTJkMmEzZThiNWYzMzdmYjM4MGNjNzExYzliZjFi"
+  },
+ {
+  "frame": {
+    "name": "Mini-sudoku",
+    "version": "1",
+    "iconUrl": "https://mini-sudoku-ten.vercel.app/icon.png",
+    "homeUrl": "https://mini-sudoku-ten.vercel.app",
+    "imageUrl": "https://mini-sudoku-ten.vercel.app/image.png",
+    "buttonTitle": "Sudoku",
+    "splashImageUrl": "https://mini-sudoku-ten.vercel.app/splash.png",
+    "splashBackgroundColor": "#0F172A",
+    "webhookUrl": "https://mini-sudoku-ten.vercel.app/api/webhook",
+    "subtitle": "Play Anytime, Anywhere",
+    "description": "Mini Sudoku is a fun, engaging, and compact version of the classic number puzzle game, designed to fit seamlessly into your busy life. Whether you're looking for a quick brain workout during a break or a longer puzzle-solving session, Mini Sudoku delivers the perfect balance of simplicity and challenge. With adjustable difficulty levels and a sleek, intuitive interface, this app is ideal for players of all ages and skill levels.  Track your progress, challenge yourself to solve puzzles faster, and sharpen your logical thinking skills with each game. The app is lightweight, so it won’t slow down your device, and you can dive right into solving puzzles whenever you have a few free moments. Mini Sudoku—small puzzles, big fun!",
+    "primaryCategory": "games",
+    "screenshotUrls": [
+      "https://mini-sudoku-ten.vercel.app/icon.png"
+    ],
+    "heroImageUrl": "https://mini-sudoku-ten.vercel.app/icon.png",
+    "tags": [
+      "minisudoku",
+      "playanywhere",
+      "whattoplay",
+      "brainteaser",
+      "brainbooster"
+    ],
+    "tagline": "Big Fun in a Small Puzzle"
+  }
