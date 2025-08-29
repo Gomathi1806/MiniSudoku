@@ -1,8 +1,8 @@
 {
-  "accountAssociation": {
-    "header": "eyJmaWQiOjkyNzgwNCwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweEUwNDA4NTU2RDQxNTNDMGVGOUFmNDkxMzcwNTlhQjQ3ODFhMzBEMTkifQ",
-    "payload": "eyJkb21haW4iOiJtaW5pLXN1ZG9rdS10ZW4udmVyY2VsLmFwcCJ9",
-    "signature": "MHhmN2M5ZDg3YTdlMzA3MTNjZTg5NThiZTc3OWVjMjg5MjMxOGNkZjIxZWE5MzdjNDM4ZDZjMGRhNDQ5Nzc1MmU3NTRmZDdjNjY3MjkzNGNlMmMyMWZmZTRlNzQwZjhmZDczMzFmOTFkODVhYWE2YmI2OGZhNTZkYWEzNWFlZmY3YzFj"
+   "accountAssociation": {
+    "header": "eyJmaWQiOjkyNzgwNCwidHlwZSI6ImF1dGgiLCJrZXkiOiIweDhDRDBFYzJlY0Q4ZEIzYjdCRjE2NDg2NjcwZDA2QzhmYjk5NGFBMDYifQ",
+    "payload": "eyJkb21haW4iOiJodHRwczovL21pbmktc3Vkb2t1LXRlbi52ZXJjZWwuYXBwIn0",
+    "signature": "So1T2v3qF/8xWAhoPY1zOxOGhs++J4mwAZGEvZqYZHh92nsQz9PAYesrSVBImQ2LBE4tEHTbnr+kXMHkr2fYdhs="
   },
   "frame": {
     "name": "Minisudoku",
