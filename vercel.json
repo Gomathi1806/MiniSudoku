@@ -1,20 +1,9 @@
-
 {
-  "rewrites": [
+  "redirects": [
     {
-      "source": "/.well-known/farcaster/app.json",
-      "destination": "/farcaster.json"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/(?:farcaster\\.json|\\.well-known/farcaster/app\\.json)",
-      "headers": [
-        {
-          "key": "Content-Type",
-          "value": "application/json"
-        }
-      ]
+      "source": "/.well-known/farcaster.json",
+      "destination": "https://api.farcaster.xyz/miniapps/hosted-manifest/0198f6fd-b8ee-6012-9a49-25b54c631976",
+      "permanent": false
     }
   ]
 }
