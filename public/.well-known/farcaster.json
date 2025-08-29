@@ -1,8 +1,8 @@
 {
    "accountAssociation": {
     "header": "eyJmaWQiOjkyNzgwNCwidHlwZSI6ImF1dGgiLCJrZXkiOiIweDhDRDBFYzJlY0Q4ZEIzYjdCRjE2NDg2NjcwZDA2QzhmYjk5NGFBMDYifQ",
-    "payload": "eyJkb21haW4iOiJodHRwczovL21pbmktc3Vkb2t1LXRlbi52ZXJjZWwuYXBwIn0",
-    "signature": "So1T2v3qF/8xWAhoPY1zOxOGhs++J4mwAZGEvZqYZHh92nsQz9PAYesrSVBImQ2LBE4tEHTbnr+kXMHkr2fYdhs="
+    "payload": "eyJkb21haW4iOiJtaW5pLXN1ZG9rdS0tdGVuLnZlcmNlbC5hcHAifQ",
+    "signature": "MHhjZDBjNDE3ZDI3Mzc3NDNjNGVjYWVhMTc3YzU3MDY4ZTE3MDA0NGY2OGExYTNhODIzYWExNzAzMmI0ZGUwMzUwMTQwNzllODI3MzkwYzJiYzM4NmZiZDk2NmJkNThhMTNiMDU1NWQzNGE4MDc5ZDRmZGM3MDlhOWEwYTEzZDY2NTFi"
   },
   "frame": {
     "name": "Minisudoku",
