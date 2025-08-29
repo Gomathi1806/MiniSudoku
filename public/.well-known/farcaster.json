@@ -1,18 +1,17 @@
 {
-   "accountAssociation": {
+  "accountAssociation": {
     "header": "eyJmaWQiOjkyNzgwNCwidHlwZSI6ImF1dGgiLCJrZXkiOiIweDhDRDBFYzJlY0Q4ZEIzYjdCRjE2NDg2NjcwZDA2QzhmYjk5NGFBMDYifQ",
-    "payload": "eyJkb21haW4iOiJtaW5pLXN1ZG9rdS0tdGVuLnZlcmNlbC5hcHAifQ",
+    "payload": "eyJkb21haW4iOiJtaW5pLXN1ZG9rdS10ZW4udmVyY2VsLmFwcCJ9",
     "signature": "MHhjZDBjNDE3ZDI3Mzc3NDNjNGVjYWVhMTc3YzU3MDY4ZTE3MDA0NGY2OGExYTNhODIzYWExNzAzMmI0ZGUwMzUwMTQwNzllODI3MzkwYzJiYzM4NmZiZDk2NmJkNThhMTNiMDU1NWQzNGE4MDc5ZDRmZGM3MDlhOWEwYTEzZDY2NTFi"
   },
   "frame": {
     "name": "Minisudoku",
     "version": "1",
-    "iconUrl": "https://https://mini-sudoku-ten.vercel.app/icon.png",
-    "homeUrl": "https://https://mini-sudoku-ten.vercel.app",
-    "imageUrl": "https://https://mini-sudoku-ten.vercel.app/image.png",
-    "splashImageUrl": "https://https://mini-sudoku-ten.vercel.app/splash.png",
-    "splashBackgroundColor": " #0F172A",
-    "webhookUrl": "https://https://mini-sudoku-ten.vercel.app/api/webhook",
+    "iconUrl": "https://mini-sudoku-ten.vercel.app/icon.png",
+    "homeUrl": "https://mini-sudoku-ten.vercel.app",
+    "imageUrl": "https://mini-sudoku-ten.vercel.app/image.png",
+    "splashImageUrl": "https://mini-sudoku-ten.vercel.app/splash.png",
+    "splashBackgroundColor": "#0F172A",
     "subtitle": "Quick Puzzles, Big Fun",
     "description": "Mini Sudoku - Big Fun in a Small Puzzle for kids",
     "primaryCategory": "games",
