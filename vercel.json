@@ -1,7 +1,14 @@
+
 {
+  "rewrites": [
+    {
+      "source": "/.well-known/farcaster/app.json",
+      "destination": "/farcaster.json"
+    }
+  ],
   "headers": [
     {
-      "source": "/farcaster.json",
+      "source": "/(?:farcaster\\.json|\\.well-known/farcaster/app\\.json)",
       "headers": [
         {
           "key": "Content-Type",
