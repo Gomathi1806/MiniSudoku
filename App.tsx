@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import SudokuGrid from './components/SudokuGrid';
 import Controls from './components/Controls';
 import NumberPad from './components/NumberPad';
+import Modal from './components/Modal';
 import { generatePuzzle, findEmptyCell, gameConfigs } from './services/sudoku';
 import { Grid, Cell, Difficulty, GameMode } from './types';
 import { useCelo } from './useCelo';
@@ -22,6 +23,7 @@ const App: React.FC = () => {
   const [message, setMessage] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isHintLoading, setIsHintLoading] = useState<boolean>(false);
+  const [showSolveConfirm, setShowSolveConfirm] = useState<boolean>(false);
 
   const { connectWallet, sendCUSDForHint, address, isConnected, error: celoError } = useCelo();
 
@@ -38,6 +40,9 @@ const App: React.FC = () => {
       setInitialGrid(initial);
       setSolvedGrid(solved);
       setCurrentGrid(JSON.parse(JSON.stringify(initial)));
+       if (!process.env.API_KEY || process.env.API_KEY === "YOUR_GEMINI_API_KEY_HERE") {
+        setMessage("Using offline mode. Add a Gemini API key for AI puzzles.");
+      }
     } catch (error) {
         console.error("Failed to start a new game:", error);
         setMessage("Oops! Could not generate a new puzzle. Please try again.");
@@ -80,7 +85,7 @@ const App: React.FC = () => {
         if (newGrid[i][j] === 0) {
           isFullyFilled = false;
         }
-        if (newGrid[i][j] !== 0 && newGrid[i][j] !== solvedGrid[i][j]) {
+        if (newGrid[i][j] !== 0 && solvedGrid[i] && newGrid[i][j] !== solvedGrid[i][j]) {
           hasError = true;
         }
       }
@@ -156,10 +161,11 @@ const App: React.FC = () => {
   };
 
   const handleSolve = () => {
-    setCurrentGrid(solvedGrid);
+    setCurrentGrid(JSON.parse(JSON.stringify(solvedGrid)));
     setIsSolved(true);
     setMessage('Puzzle Solved!');
     setSelectedCell(null);
+    setShowSolveConfirm(false);
   };
 
   if (isLoading && initialGrid.length === 0) {
@@ -178,6 +184,25 @@ const App: React.FC = () => {
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen p-4">
+        <Modal
+            show={isSolved}
+            title="Congratulations!"
+            confirmText="Play Again"
+            onConfirm={newGame}
+        >
+            <p>You've successfully solved the puzzle!</p>
+        </Modal>
+        <Modal
+            show={showSolveConfirm}
+            title="Solve Puzzle?"
+            confirmText="Yes, Solve It"
+            onConfirm={handleSolve}
+            cancelText="No, Keep Playing"
+            onCancel={() => setShowSolveConfirm(false)}
+        >
+            <p>Are you sure you want to reveal the solution? This will end your current game.</p>
+        </Modal>
+
         <div className="w-full max-w-sm md:max-w-md lg:max-w-lg mx-auto">
             <header className="text-center mb-4 w-full">
               <div className="flex justify-between items-center mb-2">
@@ -220,8 +245,11 @@ const App: React.FC = () => {
                 />
             </div>
             
-            <p className={`text-center mt-3 h-6 transition-opacity duration-300 ${message ? 'opacity-100' : 'opacity-0'}`}>
-                {isSolved ? <span className="text-green-400 font-semibold">{message}</span> : <span>{message}</span>}
+            <p 
+                className={`text-center mt-3 h-6 transition-opacity duration-300 ${message && !isSolved ? 'opacity-100' : 'opacity-0'}`}
+                aria-live="polite"
+            >
+                <span>{message}</span>
             </p>
 
             <NumberPad 
@@ -238,7 +266,7 @@ const App: React.FC = () => {
                 onNewGame={newGame} 
                 onCheck={handleCheck} 
                 onHint={handleHint} 
-                onSolve={handleSolve}
+                onSolve={() => setShowSolveConfirm(true)}
                 isSolved={isSolved}
                 isLoading={isLoading || isHintLoading}
                 isWalletConnected={isConnected}

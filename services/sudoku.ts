@@ -135,9 +135,17 @@ const generatePuzzleOffline = (difficulty: Difficulty, gameMode: GameMode): { in
 
 
 export const generatePuzzle = async (difficulty: Difficulty, gameMode: GameMode): Promise<{ initial: Grid; solved: Grid }> => {
+    // SECURITY CHECK: Do not expose API key on the client.
+    // In a real app, this check should happen on a server proxy.
+    const apiKey = process.env.API_KEY;
+    if (!apiKey || apiKey === "YOUR_GEMINI_API_KEY_HERE") {
+        console.warn("API key not found or is a placeholder. Using offline puzzle generator. See .env.example for instructions.");
+        return generatePuzzleOffline(difficulty, gameMode);
+    }
+
     try {
         const config = gameConfigs[gameMode];
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        const ai = new GoogleGenAI({ apiKey });
         const prompt = `Generate a ${config.SIZE}x${config.SIZE} Sudoku puzzle with ${difficulty} difficulty.
         The sub-grids (boxes) are ${config.BOX_SIZE_ROW}x${config.BOX_SIZE_COL}.
         Provide the initial puzzle grid and the fully solved grid.

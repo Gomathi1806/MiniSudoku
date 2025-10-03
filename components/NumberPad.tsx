@@ -27,7 +27,6 @@ const NumberPad: React.FC<NumberPadProps> = ({ onNumberClick, onEraseClick, isCe
               ))}
             </div>
             <button
-                key="erase"
                 onClick={onEraseClick}
                 disabled={!isCellSelected}
                 className="flex items-center justify-center text-xl font-bold w-full h-14 bg-red-800 hover:bg-red-700 disabled:bg-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed rounded-md transition-colors duration-150 text-slate-100 focus:outline-none focus:ring-2 focus:ring-red-500"
@@ -55,7 +54,6 @@ const NumberPad: React.FC<NumberPadProps> = ({ onNumberClick, onEraseClick, isCe
         </button>
       ))}
       <button
-          key="erase"
           onClick={onEraseClick}
           disabled={!isCellSelected}
           className="flex items-center justify-center text-xl font-bold aspect-square bg-red-800 hover:bg-red-700 disabled:bg-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed rounded-md transition-colors duration-150 text-slate-100 focus:outline-none focus:ring-2 focus:ring-red-500"
