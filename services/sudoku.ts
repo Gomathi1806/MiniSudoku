@@ -143,13 +143,13 @@ interface PuzzleResponse {
 export const generatePuzzle = async (difficulty: Difficulty, gameMode: GameMode): Promise<PuzzleResponse> => {
     let apiKey: string | undefined;
 
-    try {
-        // This will throw a ReferenceError in browser-like environments where 'process' is not defined.
-        // The catch block ensures the app doesn't crash and proceeds gracefully.
-        apiKey = process.env.API_KEY;
-    } catch (e) {
-        // This error is expected in client-side environments.
-        // apiKey will remain undefined, and the fallback logic below will be triggered.
+    // This is the definitive, environment-safe way to access a variable that may exist in a Node.js context (like local dev)
+    // but not in a browser context (like the Vercel deployment or CI pipeline).
+    // `globalThis` is a standard feature that refers to the global object across all environments.
+    // In a browser, `globalThis.process` will be `undefined`, and this check will gracefully fail without an error.
+    // This resolves the CI/CD pipeline failure.
+    if (typeof globalThis !== 'undefined' && (globalThis as any).process && (globalThis as any).process.env) {
+      apiKey = (globalThis as any).process.env.API_KEY;
     }
     
     // SECURITY CHECK: Do not expose API key on the client.
