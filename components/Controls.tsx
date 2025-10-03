@@ -26,6 +26,12 @@ const Button: React.FC<{ onClick: () => void; children: React.ReactNode; classNa
   </button>
 );
 
+const difficultyColors: Record<Difficulty, string> = {
+    [Difficulty.Easy]: 'bg-green-500',
+    [Difficulty.Medium]: 'bg-amber-500',
+    [Difficulty.Hard]: 'bg-red-500',
+};
+
 const Controls: React.FC<ControlsProps> = ({ difficulty, onDifficultyChange, gameMode, onGameModeChange, onNewGame, onCheck, onHint, onSolve, isSolved, isLoading, isWalletConnected }) => {
   return (
     <div className="w-full max-w-sm md:max-w-md lg:max-w-lg mt-4 flex flex-col gap-4">
@@ -43,7 +49,10 @@ const Controls: React.FC<ControlsProps> = ({ difficulty, onDifficultyChange, gam
                 </select>
             </div>
             <div className="flex flex-col gap-1">
-                <label htmlFor="difficulty" className="text-sm font-medium text-slate-400">Difficulty</label>
+                <div className="flex items-center gap-2">
+                    <label htmlFor="difficulty" className="text-sm font-medium text-slate-400">Difficulty</label>
+                    <div className={`w-2.5 h-2.5 rounded-full transition-colors duration-300 ${difficultyColors[difficulty]}`} title={`Current difficulty: ${difficulty}`}></div>
+                </div>
                 <select 
                     id="difficulty" 
                     value={difficulty} 
