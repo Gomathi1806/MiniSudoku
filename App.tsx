@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import SudokuGrid from './components/SudokuGrid';
 import Controls from './components/Controls';
 import NumberPad from './components/NumberPad';
@@ -20,36 +20,47 @@ const App: React.FC = () => {
   const [currentGrid, setCurrentGrid] = useState<Grid>([]);
   const [selectedCell, setSelectedCell] = useState<Cell | null>(null);
   const [isSolved, setIsSolved] = useState<boolean>(false);
-  const [message, setMessage] = useState<string>('');
+  const [message, setMessage] = useState<{text: string; type: 'info' | 'error'} | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isHintLoading, setIsHintLoading] = useState<boolean>(false);
   const [showSolveConfirm, setShowSolveConfirm] = useState<boolean>(false);
 
+  const messageTimeoutRef = useRef<number | null>(null);
   const { connectWallet, sendCUSDForHint, address, isConnected, error: celoError } = useCelo();
 
   const config = useMemo(() => gameConfigs[gameMode], [gameMode]);
   const size = useMemo(() => config.SIZE, [config]);
+  
+  const displayMessage = useCallback((text: string, type: 'info' | 'error', duration: number = 3000) => {
+    if (messageTimeoutRef.current) {
+        clearTimeout(messageTimeoutRef.current);
+    }
+    setMessage({ text, type });
+    if (duration > 0) {
+        messageTimeoutRef.current = window.setTimeout(() => {
+            setMessage(null);
+        }, duration);
+    }
+  }, []);
 
-  const newGame = useCallback(async () => {
+
+  const newGame = useCallback(() => {
     setIsLoading(true);
-    setMessage('');
+    setMessage(null);
     setSelectedCell(null);
     setIsSolved(false);
     try {
-      const { initial, solved, message: apiMessage } = await generatePuzzle(difficulty, gameMode);
+      const { initial, solved } = generatePuzzle(difficulty, gameMode);
       setInitialGrid(initial);
       setSolvedGrid(solved);
       setCurrentGrid(JSON.parse(JSON.stringify(initial)));
-      if (apiMessage) {
-        setMessage(apiMessage);
-      }
     } catch (error) {
         console.error("Failed to start a new game:", error);
-        setMessage("Oops! Could not generate a new puzzle. Please try again.");
+        displayMessage("Puzzle generation failed. Try a new game or different mode.", "error");
     } finally {
         setIsLoading(false);
     }
-  }, [difficulty, gameMode]);
+  }, [difficulty, gameMode, displayMessage]);
 
   useEffect(() => {
     newGame();
@@ -57,13 +68,9 @@ const App: React.FC = () => {
   
   useEffect(() => {
     if (celoError) {
-        setMessage(celoError);
-        const timer = setTimeout(() => {
-            setMessage(prev => prev === celoError ? '' : prev);
-        }, 3000); 
-        return () => clearTimeout(timer);
+        displayMessage(celoError, "error");
     }
-  }, [celoError]);
+  }, [celoError, displayMessage]);
 
   const handleCellClick = (row: number, col: number) => {
     setSelectedCell({ row, col });
@@ -93,10 +100,10 @@ const App: React.FC = () => {
 
     if (isFullyFilled && !hasError) {
       setIsSolved(true);
-      setMessage('Congratulations! Puzzle solved!');
+      setMessage(null);
       setSelectedCell(null);
     } else {
-      setMessage('');
+      setMessage(null);
     }
   };
   
@@ -109,7 +116,7 @@ const App: React.FC = () => {
     newGrid[row][col] = 0;
     setCurrentGrid(newGrid);
     setIsSolved(false);
-    setMessage('');
+    setMessage(null);
   };
 
   const handleDifficultyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -130,8 +137,9 @@ const App: React.FC = () => {
         }
       }
     }
-    setMessage(errors > 0 ? `Found ${errors} incorrect number(s).` : 'Looking good so far!');
-    setTimeout(() => setMessage(''), 2000);
+    const msg = errors > 0 ? `Found ${errors} incorrect number(s).` : 'Looking good so far!';
+    const type = errors > 0 ? 'error' : 'info';
+    displayMessage(msg, type, 2000);
   };
 
   const handleHint = async () => {
@@ -139,22 +147,20 @@ const App: React.FC = () => {
 
     const emptyCell = findEmptyCell(currentGrid);
     if (!emptyCell) {
-      setMessage("No empty cells left for a hint!");
-      setTimeout(() => setMessage(''), 2000);
+      displayMessage("No empty cells left for a hint!", "info");
       return;
     }
     
     setIsHintLoading(true);
-    setMessage('Processing payment for hint...');
+    displayMessage('Processing payment for hint...', 'info', 0);
     const paymentSuccessful = await sendCUSDForHint();
     
     if (paymentSuccessful) {
-        setMessage('Payment successful! Revealing hint.');
+        displayMessage('Payment successful! Revealing hint.', 'info');
         const [row, col] = emptyCell;
         const correctValue = solvedGrid[row][col];
         setSelectedCell({ row, col });
         handleNumberInput(correctValue);
-        setTimeout(() => setMessage(''), 2000);
     }
     
     setIsHintLoading(false);
@@ -163,7 +169,7 @@ const App: React.FC = () => {
   const handleSolve = () => {
     setCurrentGrid(JSON.parse(JSON.stringify(solvedGrid)));
     setIsSolved(true);
-    setMessage('Puzzle Solved!');
+    setMessage(null);
     setSelectedCell(null);
     setShowSolveConfirm(false);
   };
@@ -181,6 +187,8 @@ const App: React.FC = () => {
       </div>
     );
   }
+
+  const messageColor = message?.type === 'error' ? 'text-red-400' : 'text-slate-400';
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen p-4">
@@ -246,10 +254,10 @@ const App: React.FC = () => {
             </div>
             
             <p 
-                className={`text-center mt-3 h-6 transition-opacity duration-300 ${message && !isSolved ? 'opacity-100' : 'opacity-0'}`}
+                className={`text-center mt-3 h-6 transition-opacity duration-300 ${message ? 'opacity-100' : 'opacity-0'} ${messageColor}`}
                 aria-live="polite"
             >
-                <span>{message}</span>
+                <span>{message?.text}</span>
             </p>
 
             <NumberPad 

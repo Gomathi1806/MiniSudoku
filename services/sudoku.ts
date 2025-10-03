@@ -1,6 +1,4 @@
-
 import { Grid, Difficulty, GameMode } from '../types';
-import { GoogleGenAI, Type } from "@google/genai";
 
 interface GameConfig {
   SIZE: number;
@@ -134,99 +132,6 @@ const generatePuzzleOffline = (difficulty: Difficulty, gameMode: GameMode): { in
   return { initial: initialGrid, solved: solvedGrid };
 };
 
-interface PuzzleResponse {
-    initial: Grid;
-    solved: Grid;
-    message?: string;
-}
-
-export const generatePuzzle = async (difficulty: Difficulty, gameMode: GameMode): Promise<PuzzleResponse> => {
-    let apiKey: string | undefined;
-
-    // This is the definitive, environment-safe way to access a variable that may exist in a Node.js context (like local dev)
-    // but not in a browser context (like the Vercel deployment or CI pipeline).
-    // `globalThis` is a standard feature that refers to the global object across all environments.
-    // In a browser, `globalThis.process` will be `undefined`, and this check will gracefully fail without an error.
-    // This resolves the CI/CD pipeline failure.
-    if (typeof globalThis !== 'undefined' && (globalThis as any).process && (globalThis as any).process.env) {
-      apiKey = (globalThis as any).process.env.API_KEY;
-    }
-    
-    // SECURITY CHECK: Do not expose API key on the client.
-    // In a real app, this check should happen on a server proxy.
-    if (!apiKey || apiKey === "YOUR_GEMINI_API_KEY_HERE") {
-        console.warn("API key not found or is a placeholder. Using offline puzzle generator. See .env.example for instructions.");
-        return { 
-            ...generatePuzzleOffline(difficulty, gameMode),
-            message: "Using offline mode. Add a Gemini API key for AI puzzles."
-        };
-    }
-
-    try {
-        const config = gameConfigs[gameMode];
-        const ai = new GoogleGenAI({ apiKey });
-        const prompt = `Generate a ${config.SIZE}x${config.SIZE} Sudoku puzzle with ${difficulty} difficulty.
-        The sub-grids (boxes) are ${config.BOX_SIZE_ROW}x${config.BOX_SIZE_COL}.
-        Provide the initial puzzle grid and the fully solved grid.
-        The grid should be a 2D array of numbers, where 0 represents an empty cell in the initial grid.
-        The size of the grid must be ${config.SIZE}x${config.SIZE}.
-        The numbers used must be from 1 to ${config.SIZE}.
-        Ensure the puzzle is valid and has a unique solution.`;
-        
-        const responseSchema = {
-            type: Type.OBJECT,
-            properties: {
-                initial: {
-                    type: Type.ARRAY,
-                    description: `The initial ${config.SIZE}x${config.SIZE} Sudoku grid with some cells empty (represented by 0).`,
-                    items: {
-                        type: Type.ARRAY,
-                        items: { type: Type.INTEGER }
-                    }
-                },
-                solved: {
-                    type: Type.ARRAY,
-                    description: `The complete solved ${config.SIZE}x${config.SIZE} Sudoku grid.`,
-                    items: {
-                        type: Type.ARRAY,
-                        items: { type: Type.INTEGER }
-                    }
-                }
-            },
-            required: ["initial", "solved"]
-        };
-
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: prompt,
-            config: {
-                responseMimeType: "application/json",
-                responseSchema: responseSchema,
-            },
-        });
-
-        const jsonString = response.text.trim();
-        const puzzle = JSON.parse(jsonString);
-
-        if (
-            puzzle.initial && Array.isArray(puzzle.initial) && puzzle.initial.length === config.SIZE &&
-            puzzle.solved && Array.isArray(puzzle.solved) && puzzle.solved.length === config.SIZE
-        ) {
-            return puzzle;
-        } else {
-            console.error("AI response format is invalid. Falling back to offline generation.");
-            return { 
-                ...generatePuzzleOffline(difficulty, gameMode),
-                message: "AI response was invalid. Using offline mode."
-            };
-        }
-
-    } catch (error) {
-        console.error("Error generating puzzle with AI:", error);
-        console.log("Falling back to offline puzzle generation.");
-        return { 
-            ...generatePuzzleOffline(difficulty, gameMode),
-            message: "AI puzzle generation failed. Using offline mode."
-        };
-    }
+export const generatePuzzle = (difficulty: Difficulty, gameMode: GameMode): { initial: Grid; solved: Grid } => {
+    return generatePuzzleOffline(difficulty, gameMode);
 };
