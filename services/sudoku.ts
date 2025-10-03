@@ -143,9 +143,13 @@ interface PuzzleResponse {
 export const generatePuzzle = async (difficulty: Difficulty, gameMode: GameMode): Promise<PuzzleResponse> => {
     let apiKey: string | undefined;
 
-    // Safely access environment variables using bracket notation to bypass naive CI linters.
-    if (typeof process !== 'undefined' && process['env']) {
-        apiKey = process['env']['API_KEY'];
+    try {
+        // This will throw a ReferenceError in browser-like environments where 'process' is not defined.
+        // The catch block ensures the app doesn't crash and proceeds gracefully.
+        apiKey = process.env.API_KEY;
+    } catch (e) {
+        // This error is expected in client-side environments.
+        // apiKey will remain undefined, and the fallback logic below will be triggered.
     }
     
     // SECURITY CHECK: Do not expose API key on the client.
