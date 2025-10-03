@@ -133,14 +133,22 @@ const generatePuzzleOffline = (difficulty: Difficulty, gameMode: GameMode): { in
   return { initial: initialGrid, solved: solvedGrid };
 };
 
+interface PuzzleResponse {
+    initial: Grid;
+    solved: Grid;
+    message?: string;
+}
 
-export const generatePuzzle = async (difficulty: Difficulty, gameMode: GameMode): Promise<{ initial: Grid; solved: Grid }> => {
+export const generatePuzzle = async (difficulty: Difficulty, gameMode: GameMode): Promise<PuzzleResponse> => {
     // SECURITY CHECK: Do not expose API key on the client.
     // In a real app, this check should happen on a server proxy.
     const apiKey = process.env.API_KEY;
     if (!apiKey || apiKey === "YOUR_GEMINI_API_KEY_HERE") {
         console.warn("API key not found or is a placeholder. Using offline puzzle generator. See .env.example for instructions.");
-        return generatePuzzleOffline(difficulty, gameMode);
+        return { 
+            ...generatePuzzleOffline(difficulty, gameMode),
+            message: "Using offline mode. Add a Gemini API key for AI puzzles."
+        };
     }
 
     try {
@@ -196,12 +204,18 @@ export const generatePuzzle = async (difficulty: Difficulty, gameMode: GameMode)
             return puzzle;
         } else {
             console.error("AI response format is invalid. Falling back to offline generation.");
-            return generatePuzzleOffline(difficulty, gameMode);
+            return { 
+                ...generatePuzzleOffline(difficulty, gameMode),
+                message: "AI response was invalid. Using offline mode."
+            };
         }
 
     } catch (error) {
         console.error("Error generating puzzle with AI:", error);
         console.log("Falling back to offline puzzle generation.");
-        return generatePuzzleOffline(difficulty, gameMode);
+        return { 
+            ...generatePuzzleOffline(difficulty, gameMode),
+            message: "AI puzzle generation failed. Using offline mode."
+        };
     }
 };

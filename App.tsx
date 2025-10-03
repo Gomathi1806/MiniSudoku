@@ -36,12 +36,12 @@ const App: React.FC = () => {
     setSelectedCell(null);
     setIsSolved(false);
     try {
-      const { initial, solved } = await generatePuzzle(difficulty, gameMode);
+      const { initial, solved, message: apiMessage } = await generatePuzzle(difficulty, gameMode);
       setInitialGrid(initial);
       setSolvedGrid(solved);
       setCurrentGrid(JSON.parse(JSON.stringify(initial)));
-       if (!process.env.API_KEY || process.env.API_KEY === "YOUR_GEMINI_API_KEY_HERE") {
-        setMessage("Using offline mode. Add a Gemini API key for AI puzzles.");
+      if (apiMessage) {
+        setMessage(apiMessage);
       }
     } catch (error) {
         console.error("Failed to start a new game:", error);
