@@ -5,13 +5,14 @@ interface NumberPadProps {
   onNumberClick: (num: number) => void;
   onEraseClick: () => void;
   isCellSelected: boolean;
+  size: number;
 }
 
-const NumberPad: React.FC<NumberPadProps> = ({ onNumberClick, onEraseClick, isCellSelected }) => {
-  const numbers = [1, 2, 3, 4];
+const NumberPad: React.FC<NumberPadProps> = ({ onNumberClick, onEraseClick, isCellSelected, size }) => {
+  const numbers = Array.from({ length: size }, (_, i) => i + 1);
 
   return (
-    <div className="w-full max-w-sm md:max-w-md lg:max-w-lg mt-4 grid grid-cols-5 gap-2">
+    <div className={`w-full max-w-sm md:max-w-md lg:max-w-lg mt-4 grid ${size === 4 ? 'grid-cols-5' : 'grid-cols-4'} gap-2`}>
       {numbers.map((num) => (
         <button
           key={num}

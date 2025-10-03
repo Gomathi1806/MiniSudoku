@@ -1,32 +1,60 @@
-import { Grid, Difficulty } from '../types';
+import { Grid, Difficulty, GameMode } from '../types';
 import { GoogleGenAI, Type } from "@google/genai";
 
-const SIZE = 4;
-const BOX_SIZE = 2;
+interface GameConfig {
+  SIZE: number;
+  BOX_SIZE_ROW: number;
+  BOX_SIZE_COL: number;
+  NUMBERS: number[];
+  EMPTY_CELLS: {
+    [Difficulty.Easy]: number;
+    [Difficulty.Medium]: number;
+    [Difficulty.Hard]: number;
+  };
+}
 
-export const isValid = (grid: Grid, row: number, col: number, num: number): boolean => {
-  // Check row
-  for (let i = 0; i < SIZE; i++) {
-    if (grid[row][i] === num) {
-      return false;
+export const gameConfigs: Record<GameMode, GameConfig> = {
+  [GameMode.Mini]: {
+    SIZE: 4,
+    BOX_SIZE_ROW: 2,
+    BOX_SIZE_COL: 2,
+    NUMBERS: [1, 2, 3, 4],
+    EMPTY_CELLS: {
+      [Difficulty.Easy]: 6,
+      [Difficulty.Medium]: 8,
+      [Difficulty.Hard]: 10,
     }
+  },
+  [GameMode.Classic]: {
+    SIZE: 6,
+    BOX_SIZE_ROW: 2,
+    BOX_SIZE_COL: 3,
+    NUMBERS: [1, 2, 3, 4, 5, 6],
+    EMPTY_CELLS: {
+      [Difficulty.Easy]: 15,
+      [Difficulty.Medium]: 20,
+      [Difficulty.Hard]: 25,
+    }
+  }
+};
+
+export const isValid = (grid: Grid, row: number, col: number, num: number, config: GameConfig): boolean => {
+  // Check row
+  for (let i = 0; i < config.SIZE; i++) {
+    if (grid[row][i] === num) return false;
   }
 
   // Check column
-  for (let i = 0; i < SIZE; i++) {
-    if (grid[i][col] === num) {
-      return false;
-    }
+  for (let i = 0; i < config.SIZE; i++) {
+    if (grid[i][col] === num) return false;
   }
 
-  // Check 2x2 box
-  const boxRowStart = Math.floor(row / BOX_SIZE) * BOX_SIZE;
-  const boxColStart = Math.floor(col / BOX_SIZE) * BOX_SIZE;
-  for (let i = 0; i < BOX_SIZE; i++) {
-    for (let j = 0; j < BOX_SIZE; j++) {
-      if (grid[boxRowStart + i][boxColStart + j] === num) {
-        return false;
-      }
+  // Check box
+  const boxRowStart = Math.floor(row / config.BOX_SIZE_ROW) * config.BOX_SIZE_ROW;
+  const boxColStart = Math.floor(col / config.BOX_SIZE_COL) * config.BOX_SIZE_COL;
+  for (let i = 0; i < config.BOX_SIZE_ROW; i++) {
+    for (let j = 0; j < config.BOX_SIZE_COL; j++) {
+      if (grid[boxRowStart + i][boxColStart + j] === num) return false;
     }
   }
 
@@ -34,11 +62,9 @@ export const isValid = (grid: Grid, row: number, col: number, num: number): bool
 };
 
 export const findEmptyCell = (grid: Grid): [number, number] | null => {
-  for (let i = 0; i < SIZE; i++) {
-    for (let j = 0; j < SIZE; j++) {
-      if (grid[i][j] === 0) {
-        return [i, j];
-      }
+  for (let i = 0; i < grid.length; i++) {
+    for (let j = 0; j < grid.length; j++) {
+      if (grid[i][j] === 0) return [i, j];
     }
   }
   return null;
@@ -54,19 +80,19 @@ const shuffle = <T,>(array: T[]): T[] => {
 }
 
 
-export const solve = (grid: Grid): boolean => {
+export const solve = (grid: Grid, config: GameConfig): boolean => {
   const find = findEmptyCell(grid);
   if (!find) {
     return true; // Puzzle is solved
   }
   const [row, col] = find;
-  const numbers = shuffle([1, 2, 3, 4]);
+  const numbers = shuffle([...config.NUMBERS]);
 
   for (const num of numbers) {
-    if (isValid(grid, row, col, num)) {
+    if (isValid(grid, row, col, num, config)) {
       grid[row][col] = num;
 
-      if (solve(grid)) {
+      if (solve(grid, config)) {
         return true;
       }
 
@@ -77,28 +103,18 @@ export const solve = (grid: Grid): boolean => {
   return false;
 };
 
-const generatePuzzleOffline = (difficulty: Difficulty): { initial: Grid; solved: Grid } => {
-  const solvedGrid: Grid = Array(SIZE).fill(0).map(() => Array(SIZE).fill(0));
-  solve(solvedGrid);
+const generatePuzzleOffline = (difficulty: Difficulty, gameMode: GameMode): { initial: Grid; solved: Grid } => {
+  const config = gameConfigs[gameMode];
+  const solvedGrid: Grid = Array(config.SIZE).fill(0).map(() => Array(config.SIZE).fill(0));
+  solve(solvedGrid, config);
 
   const initialGrid = JSON.parse(JSON.stringify(solvedGrid));
 
-  let cellsToRemove = 0;
-  switch (difficulty) {
-    case Difficulty.Easy:
-      cellsToRemove = 6;
-      break;
-    case Difficulty.Medium:
-      cellsToRemove = 8;
-      break;
-    case Difficulty.Hard:
-      cellsToRemove = 10;
-      break;
-  }
+  const cellsToRemove = config.EMPTY_CELLS[difficulty];
   
   const cells: {row: number, col: number}[] = [];
-  for (let i = 0; i < SIZE; i++) {
-    for (let j = 0; j < SIZE; j++) {
+  for (let i = 0; i < config.SIZE; i++) {
+    for (let j = 0; j < config.SIZE; j++) {
       cells.push({row: i, col: j});
     }
   }
@@ -118,14 +134,16 @@ const generatePuzzleOffline = (difficulty: Difficulty): { initial: Grid; solved:
 };
 
 
-export const generatePuzzle = async (difficulty: Difficulty): Promise<{ initial: Grid; solved: Grid }> => {
+export const generatePuzzle = async (difficulty: Difficulty, gameMode: GameMode): Promise<{ initial: Grid; solved: Grid }> => {
     try {
+        const config = gameConfigs[gameMode];
         const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-        const prompt = `Generate a 4x4 Sudoku puzzle with ${difficulty} difficulty.
+        const prompt = `Generate a ${config.SIZE}x${config.SIZE} Sudoku puzzle with ${difficulty} difficulty.
+        The sub-grids (boxes) are ${config.BOX_SIZE_ROW}x${config.BOX_SIZE_COL}.
         Provide the initial puzzle grid and the fully solved grid.
         The grid should be a 2D array of numbers, where 0 represents an empty cell in the initial grid.
-        The size of the grid must be 4x4.
-        The numbers used must be 1, 2, 3, and 4.
+        The size of the grid must be ${config.SIZE}x${config.SIZE}.
+        The numbers used must be from 1 to ${config.SIZE}.
         Ensure the puzzle is valid and has a unique solution.`;
         
         const responseSchema = {
@@ -133,7 +151,7 @@ export const generatePuzzle = async (difficulty: Difficulty): Promise<{ initial:
             properties: {
                 initial: {
                     type: Type.ARRAY,
-                    description: "The initial 4x4 Sudoku grid with some cells empty (represented by 0).",
+                    description: `The initial ${config.SIZE}x${config.SIZE} Sudoku grid with some cells empty (represented by 0).`,
                     items: {
                         type: Type.ARRAY,
                         items: { type: Type.INTEGER }
@@ -141,7 +159,7 @@ export const generatePuzzle = async (difficulty: Difficulty): Promise<{ initial:
                 },
                 solved: {
                     type: Type.ARRAY,
-                    description: "The complete solved 4x4 Sudoku grid.",
+                    description: `The complete solved ${config.SIZE}x${config.SIZE} Sudoku grid.`,
                     items: {
                         type: Type.ARRAY,
                         items: { type: Type.INTEGER }
@@ -164,18 +182,18 @@ export const generatePuzzle = async (difficulty: Difficulty): Promise<{ initial:
         const puzzle = JSON.parse(jsonString);
 
         if (
-            puzzle.initial && Array.isArray(puzzle.initial) && puzzle.initial.length === SIZE &&
-            puzzle.solved && Array.isArray(puzzle.solved) && puzzle.solved.length === SIZE
+            puzzle.initial && Array.isArray(puzzle.initial) && puzzle.initial.length === config.SIZE &&
+            puzzle.solved && Array.isArray(puzzle.solved) && puzzle.solved.length === config.SIZE
         ) {
             return puzzle;
         } else {
             console.error("AI response format is invalid. Falling back to offline generation.");
-            return generatePuzzleOffline(difficulty);
+            return generatePuzzleOffline(difficulty, gameMode);
         }
 
     } catch (error) {
         console.error("Error generating puzzle with AI:", error);
         console.log("Falling back to offline puzzle generation.");
-        return generatePuzzleOffline(difficulty);
+        return generatePuzzleOffline(difficulty, gameMode);
     }
 };

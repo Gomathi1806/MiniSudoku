@@ -1,12 +1,19 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import SudokuGrid from './components/SudokuGrid';
 import Controls from './components/Controls';
 import NumberPad from './components/NumberPad';
-import { generatePuzzle, findEmptyCell } from './services/sudoku';
-import { Grid, Cell, Difficulty } from './types';
+import { generatePuzzle, findEmptyCell, gameConfigs } from './services/sudoku';
+import { Grid, Cell, Difficulty, GameMode } from './types';
+import { useCelo } from './useCelo';
+
+const truncateAddress = (address: string) => {
+    if (!address) return '';
+    return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+}
 
 const App: React.FC = () => {
   const [difficulty, setDifficulty] = useState<Difficulty>(Difficulty.Easy);
+  const [gameMode, setGameMode] = useState<GameMode>(GameMode.Mini);
   const [initialGrid, setInitialGrid] = useState<Grid>([]);
   const [solvedGrid, setSolvedGrid] = useState<Grid>([]);
   const [currentGrid, setCurrentGrid] = useState<Grid>([]);
@@ -14,6 +21,12 @@ const App: React.FC = () => {
   const [isSolved, setIsSolved] = useState<boolean>(false);
   const [message, setMessage] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isHintLoading, setIsHintLoading] = useState<boolean>(false);
+
+  const { connectWallet, sendCUSDForHint, address, isConnected, error: celoError } = useCelo();
+
+  const config = useMemo(() => gameConfigs[gameMode], [gameMode]);
+  const size = useMemo(() => config.SIZE, [config]);
 
   const newGame = useCallback(async () => {
     setIsLoading(true);
@@ -21,7 +34,7 @@ const App: React.FC = () => {
     setSelectedCell(null);
     setIsSolved(false);
     try {
-      const { initial, solved } = await generatePuzzle(difficulty);
+      const { initial, solved } = await generatePuzzle(difficulty, gameMode);
       setInitialGrid(initial);
       setSolvedGrid(solved);
       setCurrentGrid(JSON.parse(JSON.stringify(initial)));
@@ -31,11 +44,21 @@ const App: React.FC = () => {
     } finally {
         setIsLoading(false);
     }
-  }, [difficulty]);
+  }, [difficulty, gameMode]);
 
   useEffect(() => {
     newGame();
   }, [newGame]);
+  
+  useEffect(() => {
+    if (celoError) {
+        setMessage(celoError);
+        const timer = setTimeout(() => {
+            setMessage(prev => prev === celoError ? '' : prev);
+        }, 3000); 
+        return () => clearTimeout(timer);
+    }
+  }, [celoError]);
 
   const handleCellClick = (row: number, col: number) => {
     setSelectedCell({ row, col });
@@ -52,8 +75,8 @@ const App: React.FC = () => {
 
     let isFullyFilled = true;
     let hasError = false;
-    for (let i = 0; i < 4; i++) {
-      for (let j = 0; j < 4; j++) {
+    for (let i = 0; i < size; i++) {
+      for (let j = 0; j < size; j++) {
         if (newGrid[i][j] === 0) {
           isFullyFilled = false;
         }
@@ -88,11 +111,15 @@ const App: React.FC = () => {
     setDifficulty(e.target.value as Difficulty);
   };
   
+  const handleGameModeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setGameMode(e.target.value as GameMode);
+  };
+
   const handleCheck = () => {
     if (isSolved) return;
     let errors = 0;
-    for (let i = 0; i < 4; i++) {
-      for (let j = 0; j < 4; j++) {
+    for (let i = 0; i < size; i++) {
+      for (let j = 0; j < size; j++) {
         if (currentGrid[i][j] !== 0 && currentGrid[i][j] !== solvedGrid[i][j]) {
           errors++;
         }
@@ -102,24 +129,30 @@ const App: React.FC = () => {
     setTimeout(() => setMessage(''), 2000);
   };
 
-  const handleHint = () => {
-    if (isSolved) return;
-    const emptyCell = findEmptyCell(currentGrid);
-    if (emptyCell) {
-      const [row, col] = emptyCell;
-      const correctValue = solvedGrid[row][col];
-      setSelectedCell({ row, col });
-      
-      const newGrid = JSON.parse(JSON.stringify(currentGrid));
-      newGrid[row][col] = correctValue;
-      setCurrentGrid(newGrid);
+  const handleHint = async () => {
+    if (isSolved || isHintLoading || isLoading) return;
 
-      // Re-run the solved check after applying the hint
-      handleNumberInput(correctValue);
-    } else {
+    const emptyCell = findEmptyCell(currentGrid);
+    if (!emptyCell) {
       setMessage("No empty cells left for a hint!");
       setTimeout(() => setMessage(''), 2000);
+      return;
     }
+    
+    setIsHintLoading(true);
+    setMessage('Processing payment for hint...');
+    const paymentSuccessful = await sendCUSDForHint();
+    
+    if (paymentSuccessful) {
+        setMessage('Payment successful! Revealing hint.');
+        const [row, col] = emptyCell;
+        const correctValue = solvedGrid[row][col];
+        setSelectedCell({ row, col });
+        handleNumberInput(correctValue);
+        setTimeout(() => setMessage(''), 2000);
+    }
+    
+    setIsHintLoading(false);
   };
 
   const handleSolve = () => {
@@ -146,13 +179,30 @@ const App: React.FC = () => {
   return (
     <main className="flex flex-col items-center justify-center min-h-screen p-4">
         <div className="w-full max-w-sm md:max-w-md lg:max-w-lg mx-auto">
-            <header className="text-center mb-4">
-                <h1 className="text-4xl font-bold text-cyan-400">Farcaster Mini Sudoku</h1>
-                <p className="text-slate-400">A 4x4 logic puzzle powered by Goms.</p>
+            <header className="text-center mb-4 w-full">
+              <div className="flex justify-between items-center mb-2">
+                <div className="w-24"></div> {/* Spacer */}
+                <h1 className="text-4xl font-bold text-cyan-400">Farcaster Sudoku</h1>
+                <div className="text-right w-24">
+                    {isConnected && address ? (
+                        <div className="bg-slate-700 text-sm text-green-400 font-mono px-3 py-1.5 rounded-md" title={address}>
+                            {truncateAddress(address)}
+                        </div>
+                    ) : (
+                        <button 
+                            onClick={connectWallet}
+                            className="px-3 py-1.5 rounded-md font-semibold text-sm transition-all duration-200 bg-green-600 hover:bg-green-500 text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-green-400"
+                        >
+                            Connect
+                        </button>
+                    )}
+                </div>
+              </div>
+              <p className="text-slate-400">A {gameMode} logic puzzle powered by Goms.</p>
             </header>
             
             <div className="relative">
-                 {isLoading && (
+                 {(isLoading || isHintLoading) && (
                     <div className="absolute inset-0 bg-slate-900/70 flex items-center justify-center z-20 rounded-lg">
                         <svg className="animate-spin h-8 w-8 text-cyan-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -165,7 +215,8 @@ const App: React.FC = () => {
                     initialGrid={initialGrid}
                     solvedGrid={solvedGrid}
                     selectedCell={selectedCell} 
-                    onCellClick={handleCellClick} 
+                    onCellClick={handleCellClick}
+                    size={size}
                 />
             </div>
             
@@ -177,16 +228,20 @@ const App: React.FC = () => {
                 onNumberClick={handleNumberInput} 
                 onEraseClick={handleErase}
                 isCellSelected={selectedCell !== null && !isSolved}
+                size={size}
             />
             <Controls 
                 difficulty={difficulty} 
                 onDifficultyChange={handleDifficultyChange}
+                gameMode={gameMode}
+                onGameModeChange={handleGameModeChange}
                 onNewGame={newGame} 
                 onCheck={handleCheck} 
                 onHint={handleHint} 
                 onSolve={handleSolve}
                 isSolved={isSolved}
-                isLoading={isLoading}
+                isLoading={isLoading || isHintLoading}
+                isWalletConnected={isConnected}
             />
         </div>
     </main>

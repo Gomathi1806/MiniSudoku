@@ -11,3 +11,8 @@ export enum Difficulty {
   Medium = 'Medium',
   Hard = 'Hard',
 }
+
+export enum GameMode {
+    Mini = '4x4',
+    Classic = '6x6',
+}
