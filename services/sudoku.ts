@@ -1,3 +1,4 @@
+
 import { Grid, Difficulty, GameMode } from '../types';
 import { GoogleGenAI, Type } from "@google/genai";
 
@@ -140,9 +141,16 @@ interface PuzzleResponse {
 }
 
 export const generatePuzzle = async (difficulty: Difficulty, gameMode: GameMode): Promise<PuzzleResponse> => {
+    let apiKey: string | undefined;
+
+    // Safely access process.env only if it exists.
+    // This prevents crashes in browser environments or CI pipelines where 'process' is not defined.
+    if (typeof process !== 'undefined' && process.env) {
+        apiKey = process.env.API_KEY;
+    }
+    
     // SECURITY CHECK: Do not expose API key on the client.
     // In a real app, this check should happen on a server proxy.
-    const apiKey = process.env.API_KEY;
     if (!apiKey || apiKey === "YOUR_GEMINI_API_KEY_HERE") {
         console.warn("API key not found or is a placeholder. Using offline puzzle generator. See .env.example for instructions.");
         return { 
