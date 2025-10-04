@@ -24,8 +24,10 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isHintLoading, setIsHintLoading] = useState<boolean>(false);
   const [showSolveConfirm, setShowSolveConfirm] = useState<boolean>(false);
+  const [elapsedTime, setElapsedTime] = useState<number>(0);
 
   const messageTimeoutRef = useRef<number | null>(null);
+  const timerIntervalRef = useRef<number | null>(null);
   const { connectWallet, sendCUSDForHint, address, isConnected, error: celoError } = useCelo();
 
   const config = useMemo(() => gameConfigs[gameMode], [gameMode]);
@@ -49,6 +51,7 @@ const App: React.FC = () => {
     setMessage(null);
     setSelectedCell(null);
     setIsSolved(false);
+    setElapsedTime(0);
     try {
       const { initial, solved } = generatePuzzle(difficulty, gameMode);
       setInitialGrid(initial);
@@ -66,6 +69,24 @@ const App: React.FC = () => {
     newGame();
   }, [newGame]);
   
+  useEffect(() => {
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+    }
+
+    if (!isLoading && !isSolved) {
+      timerIntervalRef.current = window.setInterval(() => {
+        setElapsedTime(prevTime => prevTime + 1);
+      }, 1000);
+    }
+
+    return () => {
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+      }
+    };
+  }, [isLoading, isSolved]);
+
   useEffect(() => {
     if (celoError) {
         displayMessage(celoError, "error");
@@ -174,6 +195,12 @@ const App: React.FC = () => {
     setShowSolveConfirm(false);
   };
 
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+  };
+
   if (isLoading && initialGrid.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -199,6 +226,7 @@ const App: React.FC = () => {
             onConfirm={newGame}
         >
             <p>You've successfully solved the puzzle!</p>
+            <p className="mt-2 text-slate-400">Your time: <span className="font-bold text-slate-200">{formatTime(elapsedTime)}</span></p>
         </Modal>
         <Modal
             show={showSolveConfirm}
@@ -231,7 +259,15 @@ const App: React.FC = () => {
                     )}
                 </div>
               </div>
-              <p className="text-slate-400">A {gameMode} logic puzzle powered by Goms.</p>
+              <div className="flex justify-center items-center gap-6 mt-1">
+                <p className="text-slate-400">A {gameMode} logic puzzle powered by Goms.</p>
+                <div className="flex items-center gap-2 text-slate-300" title="Elapsed Time">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="font-mono text-lg tracking-wider">{formatTime(elapsedTime)}</span>
+                </div>
+              </div>
             </header>
             
             <div className="relative">
